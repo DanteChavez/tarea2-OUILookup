@@ -1,2 +1,4 @@
 # tarea2-OUILookup
-Tarea 2
+Integrante:
+
+Dante Chavez Dante.chavez@alumnos.uv.cl
