@@ -9,6 +9,7 @@ def leer_base_datos():
     for linea in lineas:
         if not linea.startswith("#"):
             escribir = linea.split()
+            escribir[0] = escribir[0].replace("-", ":")
             escribir = [elemento for elemento in escribir if elemento != '#'] 
             if(len(escribir) >2):
                 partes2 = escribir[2:]
@@ -17,6 +18,7 @@ def leer_base_datos():
                 dic[escribir[0]] = escribir[1]
             else:
                 print((escribir))
+    #print(dic)
     return dic
 
 # Función para obtener los datos de fabricación de una tarjeta de red por IP
@@ -49,7 +51,9 @@ def obtener_datos_por_mac(mac):
     cortado = ":".join(cortado)
     if(cortado in diccionario_mac):
         return mac2,diccionario_mac[cortado]
-    else:
+    elif(mac2 in diccionario_mac):
+        return mac2,diccionario_mac[mac2]
+    else:    
         return mac2,"Not found"
 
 # Función para obtener la tabla ARP
@@ -58,11 +62,11 @@ def obtener_tabla_arp():
     try:
         tabla_arp = subprocess.check_output(['arp', '-a'], universal_newlines=True)
         arp_itt = tabla_arp.split('\n')
-        for line in arp_itt:
-            if 'Internet Address' in line or 'Interfaz' in line or 'Direcci¢n' in line or 'Direccion' in line or 'Interface' in line:  # Ignorar las 2 primeras líneas
+        for linea in arp_itt:
+            if 'Internet Address' in linea or 'Interfaz' in linea or 'Direcci¢n' in linea or 'Direccion' in linea or 'Interface' in linea:  # Ignorar las 2 primeras líneas
                 continue
-            if line.strip():
-                parts = line.split()
+            if linea.strip():
+                parts = linea.split()
                 if len(parts) >= 2:
                     cortado = parts[1]
                     cortado = cortado.split("-")
@@ -80,7 +84,7 @@ def obtener_tabla_arp():
 def main(argv):
     #Inicializar variables
     ayuda = """
-Use: ./OUILookup --ip <IP> | --mac <IP> | --arp | [--help]
+Use: ./OUILookup --ip <IP> | --mac <MAC> | --arp | [--help]
 --ip : IP del host a consultar.
 --mac: MAC a consultar. P.e. aa:bb:cc:00:00:00.
 --arp: muestra los fabricantes de los host disponibles en la tabla arp.
@@ -120,12 +124,11 @@ Use: ./OUILookup --ip <IP> | --mac <IP> | --arp | [--help]
         #Comando --arp
         elif opt in ("-a", "--arp"):
             diccionario_arp = obtener_tabla_arp()
-            #diccionario_arp["192.168.1.500"] = "00:00:13:12:12:12"
+            print()
             print("IP\t/\tMAC\t/\t/Vendor")
             for ip in diccionario_arp:
                 mac,vendor = obtener_datos_por_mac(diccionario_arp[ip])
-                print(f"{ip}\t {diccionario_arp[ip]}, {vendor}")
-        
+                print(f"{ip}\t {diccionario_arp[ip]}, {vendor}")      
 #INICIALIZAR BASE DE DATOS COMO VARIABLE GLOBAL 
 diccionario_mac = leer_base_datos()
 #
